@@ -61,6 +61,7 @@ pub fn resolve_config(
       &mut diagnostics,
     ),
     heading_kind: get_value(&mut config, "headingKind", HeadingKind::Atx, &mut diagnostics),
+    auto_link_bare_urls: get_value(&mut config, "autoLinkBareUrls", false, &mut diagnostics),
     ignore_directive: get_value(
       &mut config,
       "ignoreDirective",

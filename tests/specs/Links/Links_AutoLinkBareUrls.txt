@@ -1,0 +1,36 @@
+~~ autoLinkBareUrls: true ~~
+!! should convert bare http URL to autolink !!
+Check out http://example.com for more.
+
+[expect]
+Check out <http://example.com> for more.
+
+!! should convert bare https URL to autolink !!
+Visit https://dprint.dev today.
+
+[expect]
+Visit <https://dprint.dev> today.
+
+!! should convert multiple bare URLs !!
+See https://example.com and https://dprint.dev for details.
+
+[expect]
+See <https://example.com> and <https://dprint.dev> for details.
+
+!! should not convert URLs already in autolinks !!
+Visit <https://example.com> now.
+
+[expect]
+Visit <https://example.com> now.
+
+!! should handle URL at end of sentence !!
+More info at https://example.com.
+
+[expect]
+More info at <https://example.com>.
+
+!! should not affect non-URLs !!
+This is regular text without URLs.
+
+[expect]
+This is regular text without URLs.

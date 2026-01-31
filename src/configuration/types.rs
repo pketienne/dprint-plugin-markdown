@@ -14,6 +14,9 @@ pub struct Configuration {
   pub strong_kind: StrongKind,
   pub unordered_list_kind: UnorderedListKind,
   pub heading_kind: HeadingKind,
+  /// Convert bare URLs (http:// or https://) to autolinks (<url>).
+  /// This implements markdownlint MD034.
+  pub auto_link_bare_urls: bool,
   pub ignore_directive: String,
   pub ignore_file_directive: String,
   pub ignore_start_directive: String,

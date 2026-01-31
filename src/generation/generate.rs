@@ -541,10 +541,51 @@ fn gen_str(text: &str, context: &mut Context) -> PrintItems {
           }
         }
 
-        self.items.push_string(current_word);
+        // Convert bare URLs to autolinks if configured (but not inside existing autolinks)
+        if self.context.configuration.auto_link_bare_urls
+          && !self.context.is_in_auto_link()
+          && is_bare_url(&current_word)
+        {
+          // Strip trailing punctuation that's not part of the URL
+          let (url, suffix) = strip_url_trailing_punctuation(&current_word);
+          self.items.push_string(format!("<{}>", url));
+          if !suffix.is_empty() {
+            self.items.push_string(suffix.to_string());
+          }
+        } else {
+          self.items.push_string(current_word);
+        }
         self.was_last_newline = false;
       }
     }
+  }
+}
+
+/// Check if a word is a bare URL (starts with http:// or https://)
+fn is_bare_url(word: &str) -> bool {
+  word.starts_with("http://") || word.starts_with("https://")
+}
+
+/// Strip trailing punctuation from a URL that's likely sentence punctuation
+/// Returns (url_without_trailing_punct, trailing_punct)
+fn strip_url_trailing_punctuation(url: &str) -> (&str, &str) {
+  // Common trailing punctuation that's typically not part of URLs
+  let trailing_punct = ['.', ',', ';', ':', '!', '?', ')', ']', '}'];
+
+  let mut end = url.len();
+  while end > 0 {
+    let last_char = url[..end].chars().last().unwrap();
+    if trailing_punct.contains(&last_char) {
+      end -= last_char.len_utf8();
+    } else {
+      break;
+    }
+  }
+
+  if end < url.len() {
+    (&url[..end], &url[end..])
+  } else {
+    (url, "")
   }
 }
 
@@ -681,11 +722,13 @@ fn gen_shortcut_link(link: &ShortcutLink, context: &mut Context) -> PrintItems {
 fn gen_auto_link(link: &AutoLink, context: &mut Context) -> PrintItems {
   // auto-links can't contain spaces, but do this anyway just in case
   context.with_no_text_wrap(|context| {
-    let mut items = PrintItems::new();
-    items.push_sc(sc!("<"));
-    items.extend(gen_nodes(&link.children, context));
-    items.push_sc(sc!(">"));
-    ir_helpers::new_line_group(items)
+    context.mark_in_auto_link(|context| {
+      let mut items = PrintItems::new();
+      items.push_sc(sc!("<"));
+      items.extend(gen_nodes(&link.children, context));
+      items.push_sc(sc!(">"));
+      ir_helpers::new_line_group(items)
+    })
   })
 }
 
