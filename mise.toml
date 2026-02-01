@@ -1,0 +1,16 @@
+[tools]
+"cargo:cargo-audit" = "latest"
+"cargo:cargo-deny" = "latest"
+
+[tools.rust]
+version = "1.93.0"
+components = "rust-src,rust-analyzer,llvm-tools"
+
+[tasks.setup]
+description = "Install WASM target for plugin builds"
+run = "rustup target add wasm32-unknown-unknown"
+
+[tasks.build-wasm]
+description = "Build the WASM plugin"
+run = "cargo build --target wasm32-unknown-unknown --release --features wasm"
+depends = ["setup"]
